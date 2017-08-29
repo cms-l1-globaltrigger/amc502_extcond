@@ -111,6 +111,7 @@
         <node id="luminosity_seg_nr"            address="0x0000001A" mask="0xffffffff" permission="r"/>
     </node>
     <node id="reset" address="0xA0" mask="0x00000001" description="Pulse reg for reset-pulse"/>
+    <node id="counter_reset" address="0xA0" mask="0x00000002" description="Pulse reg for counter reset-pulse"/>
    <node id="phase_shift_regs"   address="0xC0" description="Phase Shift Registers">
         <node id="phase_shift_00" address="0x00" mask="0x0000000f" description="Phase Shift Register for ExtCond #00"/>
         <node id="phase_shift_01" address="0x01" mask="0x0000000f" description="Phase Shift Register for ExtCond #01"/>
