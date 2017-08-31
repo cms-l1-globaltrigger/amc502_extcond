@@ -1,37 +1,54 @@
 <node description="AMC502 payload registers" fwinfo="endpoint">
-    <node id="module_info" address="0x00" description="ID registers">
-            <node id="valid_lo" address="0x0" mask="0x0000ffff"/>
-            <node id="valid_hi" address="0x1" mask="0x0000ffff"/>
-            <node id="start"    address="0x2" mask="0x00000001"/>
-            <node id="strobe"   address="0x3" mask="0x00000001"/>
-            <node id="data_mux" address="0x4" mask="0x000000ff"/>
-            <node id="ip2" address="0x5" mask="0xffffffff"/>
-            <node id="ip3" address="0x6" mask="0xffffffff"/>
-            <node id="ip4" address="0x7" mask="0xffffffff"/>
-            <node id="ip5" address="0x8" mask="0xffffffff"/>
-            <node id="ip6" address="0x9" mask="0xffffffff"/>
-            <node id="ip7" address="0xa" mask="0xffffffff"/>
-            <node id="ip8" address="0xb" mask="0xffffffff"/>
-            <node id="ip9" address="0xc" mask="0xffffffff"/>
-            <node id="ip10" address="0xd" mask="0xffffffff"/>
-            <node id="ip11" address="0xe" mask="0xffffffff"/>
-            <node id="ip12" address="0xf" mask="0xffffffff"/>
-            <node id="info" address="0x10" mask="0xffffffff"/>
-            <node id="board_id" address="0x11" mask="0xffffffff"/>
-            <node id="location" address="0x12" mask="0xffffffff"/>
-            <node id="mac_lo"   address="0x13" mask="0xffffffff"/>
-            <node id="mac_hi"   address="0x14" mask="0xffffffff"/>
-            <node id="ip_addr"  address="0x15" mask="0xffffffff"/>
-            <node id="ip19" address="0x16" mask="0xffffffff"/>
-            <node id="ip20" address="0x17" mask="0xffffffff"/>
-            <node id="ip21" address="0x18" mask="0xffffffff"/>
-            <node id="ip22" address="0x19" mask="0xffffffff"/>
-            <node id="ip23" address="0x1a" mask="0xffffffff"/>
-            <node id="ip24" address="0x1b" mask="0xffffffff"/>
-            <node id="ip25" address="0x1c" mask="0xffffffff"/>
-            <node id="ip26" address="0x1d" mask="0xffffffff"/>
-            <node id="ip27" address="0x1e" mask="0xffffffff"/>
-            <node id="ip28" address="0x1f" mask="0xffffffff"/>
+    <node id="valid_gap" address="0x00" description="Link setup registers">
+        <node id="valid_lo" address="0x0" mask="0x0000ffff"/>
+        <node id="valid_hi" address="0x1" mask="0x0000ffff"/>
+        <node id="start"    address="0x2" mask="0x00000001"/>
+        <node id="strobe"   address="0x3" mask="0x00000001"/>
+    </node>
+    <node id="mux" address="0x04" description="Multiplexer for Sim/Data">
+        <node id="data_mux" address="0x0" mask="0x000000ff"/>
+    </node>
+    <node id="ip2" address="0x5" mask="0xffffffff" description="Unused Control Reg"/>
+    <node id="ip3" address="0x6" mask="0xffffffff" description="Unused Control Reg"/>
+    <node id="ip4" address="0x7" mask="0xffffffff" description="Unused Control Reg"/>
+    <node id="ip5" address="0x8" mask="0xffffffff" description="Unused Control Reg"/>
+    <node id="ip6" address="0x9" mask="0xffffffff" description="Unused Control Reg"/>
+    <node id="ip7" address="0xa" mask="0xffffffff" description="Unused Control Reg"/>
+    <node id="ip8" address="0xb" mask="0xffffffff" description="Unused Control Reg"/>
+    <node id="ip9" address="0xc" mask="0xffffffff" description="Unused Control Reg"/>
+    <node id="spytrig_ctrl" address="0x0d" description="Control Regs for Spytrigger">
+        <node id="orbit_nr_l" address="0x00" mask="0xffffffff"/>
+        <node id="orbit_nr_h" address="0x01" mask="0x0000ffff"/>
+        <node id="control"    address="0x02">
+            <!-- <node id="spy12_once_event" address="0x00" mask="0x00000001"/> Triggers a spy event (for a specific orbit) for spy memory I and II, when written 1 -->
+            <!-- <node id="spy12_next_event" address="0x00" mask="0x00000002">  Triggers a spy event (for the next orbit) for spy memory I and II, when written 1 -->
+            <node id="clear_spy12_ready_event" address="0x00" mask="0x00000008"/> <!-- Clears the ready flag of the spy I/II trigger, when written 1 -->
+            <node id="clear_spy12_error_event" address="0x00" mask="0x00000020"/> <!-- Clears the error flag of the spy I/II trigger, when written 1 -->
+        </node>
+    </node>
+    <node id="module_info" address="0x10" description="Module Info Regs">
+        <node id="build_version"     address="0x00" mask="0x0000ffff" parameters="type=hex" description="Build Version Number"/>
+        <node id="board_id" address="0x01" mask="0xffffffff"/>
+        <node id="location" address="0x02" mask="0xffffffff"/>
+        <node id="mac_lo"   address="0x03" mask="0xffffffff"/>
+        <node id="mac_hi"   address="0x04" mask="0xffffffff"/>
+        <node id="ip_addr"  address="0x05" mask="0xffffffff"/>
+        <node id="timestamp" address="0x06" mask="0xffffffff" parameters="type=timestamp"/>
+        <node id="username"  address="0x07" mode="incremental" size="8" parameters="type=string"/>
+    </node>
+    <node id="ip19" address="0x16" mask="0xffffffff" description="Unused Status Reg"/>
+    <node id="ip20" address="0x17" mask="0xffffffff" description="Unused Status Reg"/>
+    <node id="ip21" address="0x18" mask="0xffffffff" description="Unused Status Reg"/>
+    <node id="ip22" address="0x19" mask="0xffffffff" description="Unused Status Reg"/>
+    <node id="ip23" address="0x1a" mask="0xffffffff" description="Unused Status Reg"/>
+    <node id="ip24" address="0x1b" mask="0xffffffff" description="Unused Status Reg"/>
+    <node id="ip25" address="0x1c" mask="0xffffffff" description="Unused Status Reg"/>
+    <node id="ip26" address="0x1d" mask="0xffffffff" description="Unused Status Reg"/>
+    <node id="ip27" address="0x1e" mask="0xffffffff" description="Unused Status Reg"/>
+    <node id="spytrig_status" address="0x1f" description="SpyTrigger Status Regs">
+        <node id="trig_spy12_error" address="0x00" mask="0x08000000" tags="0x0:OK,0x1:ERROR"/>
+        <node id="trig_spy12_ready" address="0x00" mask="0x20000000" tags="0x0:NOTREADY,0x1:READY"/>
+        <node id="trig_spy12_busy"  address="0x00" mask="0x80000000" tags="0x0:READY,0x1:BUSY"/>
     </node>
     <node id="delay_regs"   address="0x40" description="Delay Registers">
         <node id="delay_00" address="0x00" mask="0xffffffff" description="Delay Register for ExtCond #00"/>
@@ -110,8 +127,12 @@
         <node id="bx_nr_max"                    address="0x00000017" mask="0xffffffff" permission="r"/> <!-- should always be equal 0xdeb -->
         <node id="luminosity_seg_nr"            address="0x0000001A" mask="0xffffffff" permission="r"/>
     </node>
-    <node id="reset" address="0xA0" mask="0x00000001" description="Pulse reg for reset-pulse"/>
-    <node id="counter_reset" address="0xA0" mask="0x00000002" description="Pulse reg for counter reset-pulse"/>
+    <node id="reset"                 address="0xA0" mask="0x00000001" description="Pulse reg for reset-pulse"/>
+    <node id="phase_cntr_read_pulse" address="0xA0" mask="0x00000002" description="Pulse reg for Phase Shift Counter read"/>
+    <node id="spy12_once_event"      address="0xA0" mask="0x00000004" description="Triggers a spy event for a specific orbit"/>
+    <node id="spy12_next_event"      address="0xA0" mask="0x00000008" description="Triggers a spy event for the next orbity"/>
+    <node id="spy3_event"            address="0xA0" mask="0x00000010" description="Triggers a spy event"/>
+    <node id="counter_reset"         address="0xA0" mask="0x00000020" description="Pulse reg for counter reset-pulse"/>
     <node id="phase_shift_regs"   address="0xC0" description="Phase Shift Registers">
         <node id="phase_shift_00" address="0x00" mask="0x0000000f" description="Phase Shift Register for ExtCond #00"/>
         <node id="phase_shift_01" address="0x01" mask="0x0000000f" description="Phase Shift Register for ExtCond #01"/>
