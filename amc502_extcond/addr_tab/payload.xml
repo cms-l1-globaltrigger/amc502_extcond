@@ -330,7 +330,7 @@
         <node id="phase_counter_lo_63" address="0x7E" mask="0xffffffff" description="Phase Counter Register for ExtCond #63: Phase 0, 1, 2, 3"/>
         <node id="phase_counter_hi_63" address="0x7F" mask="0x0000ffff" description="Phase Counter Register for ExtCond #63: Phase 4, 5"/>
     </node>
-    <node id="rate_cnt_extcond" address="0x00000200" mode="incremental" size="64" permission="r"/>
+    <node id="rate_cnt_extcond" address="0x00000240" mode="incremental" size="64" permission="r"/>
     <node id="spymem" address="0x01000000" description="Spy memory" mode="incremental" size="8192" permission="rw" parameters="foo=bar;type=mem;class=ExtCondMemoryImage" description="Memory for spying the input signals"/>
     <node id="simmem" address="0x01002000" description="Simulation memory" mode="incremental" size="8192" permission="rw" parameters="foo=bar;type=mem;class=ExtCondMemoryImage" description="Memory for simulating the output signals"/>
 </node>
