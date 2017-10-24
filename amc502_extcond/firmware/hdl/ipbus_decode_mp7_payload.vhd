@@ -12,7 +12,7 @@ use work.math_pkg.all;
 package ipbus_decode_mp7_payload is
 
     -- Number of slaves defined in the address table.
-    constant N_SLAVES: positive := 8;
+    constant N_SLAVES: positive := 10;
 
     -- Define selection vector format.
     constant IPBUS_SEL_WIDTH: positive := log2c(N_SLAVES);
@@ -24,16 +24,20 @@ package ipbus_decode_mp7_payload is
     constant N_SLV_DEL: integer := 1;
     constant N_SLV_TCM: integer := 2;
     constant N_SLV_PULSE_REGS: integer := 3;
+    constant N_SLV_PHASE: integer := 4;
+    constant N_SLV_PHASECNTR: integer := 5;
 
     type n_slv_spymem_array is array (0 to 1) of natural;
-    constant N_SLV_SPYMEM : n_slv_spymem_array := (4, 5);
+    constant N_SLV_SPYMEM : n_slv_spymem_array := (6, 7);
 
     type n_slv_simmem_array is array (0 to 1) of natural;
-    constant N_SLV_SIMMEM : n_slv_simmem_array := (6, 7);
+    constant N_SLV_SIMMEM : n_slv_simmem_array := (8, 9);
 
     -- Item\'s address width in bits, used in slave implementation.
     constant N_SLV_MINFO_SIZE: integer := 5;
     constant N_SLV_DEL_SIZE: integer := 6;
+    constant N_SLV_PHASE_SIZE: integer := 6;
+    constant N_SLV_PHASECNTR_SIZE: integer := 8;
     constant N_SLV_TCM_SIZE: integer := 5;
     constant N_SLV_PULSE_REGS_SIZE: integer := 5;
     constant N_SLV_SPYMEM_SIZE: integer := 12;
@@ -51,6 +55,8 @@ package body ipbus_decode_mp7_payload is
         elsif std_match(addr, "10000000000000000000000001------") then sel := ipbus_sel_t(to_unsigned(N_SLV_DEL, IPBUS_SEL_WIDTH));         -- 0x80000040
         elsif std_match(addr, "100000000000000000000000100-----") then sel := ipbus_sel_t(to_unsigned(N_SLV_TCM, IPBUS_SEL_WIDTH));         -- 0x80000080
         elsif std_match(addr, "100000000000000000000000101-----") then sel := ipbus_sel_t(to_unsigned(N_SLV_PULSE_REGS, IPBUS_SEL_WIDTH));  -- 0x800000A0
+        elsif std_match(addr, "10000000000000000000000011------") then sel := ipbus_sel_t(to_unsigned(N_SLV_PHASE, IPBUS_SEL_WIDTH));       -- 0x800000C0
+        elsif std_match(addr, "100000000000000000000001--------") then sel := ipbus_sel_t(to_unsigned(N_SLV_PHASECNTR, IPBUS_SEL_WIDTH));   -- 0x80000100
         elsif std_match(addr, "10000001000000000000------------") then sel := ipbus_sel_t(to_unsigned(N_SLV_SPYMEM(0), IPBUS_SEL_WIDTH));   -- 0x81000000 .. 0x81000FFF
         elsif std_match(addr, "10000001000000000001------------") then sel := ipbus_sel_t(to_unsigned(N_SLV_SPYMEM(1), IPBUS_SEL_WIDTH));   -- 0x81001000 .. 0x81001FFF
         elsif std_match(addr, "10000001000000000010------------") then sel := ipbus_sel_t(to_unsigned(N_SLV_SIMMEM(0), IPBUS_SEL_WIDTH));   -- 0x81002000 .. 0x81002FFF

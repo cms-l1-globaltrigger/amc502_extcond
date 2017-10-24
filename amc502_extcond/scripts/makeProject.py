@@ -10,16 +10,18 @@ from distutils.dir_util import copy_tree
 import subprocess
 import glob
 import ConfigParser
-import sys, stat, os
+import sys, os
+import stat
 import pwd
 import socket
+import patchFiles
 
 EXIT_SUCCESS = 0
 EXIT_FAILURE = 1
 
 BoardAliases = {
     'mp7_690es': 'r1',
-    'mp7xe_690': 'xe',
+    #'mp7xe_690': 'xe',
 }
 
 def remove_file(filename):
@@ -31,10 +33,35 @@ def clear_file(filename):
     """Re-Create empty file."""
     open(filename, 'w').close()
 
-#def count_modules(menu):
-    #"""Returns count of modules of menu. *menu* is the path to the menu directory."""
-    #pattern = os.path.join(menu, 'vhdl', 'module_*')
-    #return len(glob.glob(pattern))
+def read_file(filename):
+    """Returns contents of a file."""
+    with open(filename, 'rb') as fp:
+        return fp.read()
+
+def make_executable(filename):
+    """Set executable flag for file."""
+    st = os.stat(filename)
+    os.chmod(filename, st.st_mode | stat.S_IEXEC)
+
+def template_replace(template, replace_map, result):
+    """Load template by replacing keys from dictionary and writing to result
+    file. The function ignores VHDL escaped lines.
+
+    Example:
+    >>> template_replace('sample.tpl.vhd', {'name': "title"}, 'sample.vhd')
+
+    """
+    # Read content of source file.
+    with open(template, 'rb') as fp:
+        lines = fp.readlines()
+    # Replace placeholders.
+    for key, value in replace_map.items():
+        for i, line in enumerate(lines):
+            if not line.strip().startswith('--'):
+                lines[i] = line.replace(key, value)
+    # Write content to destination file.
+    with open(result, 'wb') as fp:
+        fp.write(''.join(lines))
 
 def get_timestamp():
     return datetime.datetime.now().strftime("%Y-%m-%d-T%H-%M-%S")
@@ -49,12 +76,12 @@ def username():
     return pwd.getpwuid(os.getuid())[login]
 
 # Some other paths.
-scripts_dir = os.getcwd()
-uGTalgosPath = os.path.abspath(os.path.join(scripts_dir, '..'))
+scripts_dir = os.path.abspath(os.path.dirname(__file__))
+amc502Path = os.path.abspath(os.path.join(scripts_dir, '..'))
 
 # Target VHDL package and it's template must be defined.
-TARGET_PKG_TPL = os.path.join(uGTalgosPath, 'firmware/hdl/gt_top_pkg_tpl.vhd')
-TARGET_PKG = os.path.join(uGTalgosPath, 'firmware/hdl/gt_top_pkg.vhd')
+TARGET_PKG_TPL = os.path.join(amc502Path, 'firmware', 'hdl', 'top_decl_tpl.vhd')
+TARGET_PKG = os.path.join(amc502Path, 'firmware', 'hdl', 'top_decl.vhd')
 
 def build_t(value):
     """Custom build type validator for argparse."""
@@ -67,10 +94,10 @@ def parse_args():
     parser.add_argument('-t', '--tag', metavar = '<tag>', required = True, help = "mp7fw tag")
     parser.add_argument('--unstable', action = 'store_true', help = "use unstable tag (default is stable)")
     parser.add_argument('-o', '--old', action = 'store_true', help = "use the old ProjectManager.py commands")
-    parser.add_argument('--board', metavar = '<type>', default = 'mp7xe_690', choices = BoardAliases.keys(), help = "set board type (default is `mp7xe_690')")
+    parser.add_argument('--board', metavar = '<type>', default = 'mp7_690es', choices = BoardAliases.keys(), help = "set board type (default is `mp7_690es')")
     parser.add_argument('-u', '--user', metavar = '<username>', required = True, help = "username for SVN")
     parser.add_argument('-p', '--path', metavar = '<path>', required = True, type = os.path.abspath, help = "mp7fw tag")
-    parser.add_argument('-b', '--build', metavar = '<version>', required = True, type = build_t, help = 'build version (eg. 0x1001)')
+    parser.add_argument('-b', '--build', metavar = '<version>', required = True, type = build_t, help = 'menu build version (eg. 0x1001)')
     return parser.parse_args()
 
 def main():
@@ -85,13 +112,12 @@ def main():
     # Feth current timestamp.
     timestamp = get_timestamp()
 
-    logging.info("Creating ExtCond build area...")
+    logging.info("Creating uGT build area...")
     logging.info("tag: %s (%s)", args.tag, "unstable" if args.unstable else "stable")
     logging.info("user: %s", args.user)
     logging.info("path: %s", args.path)
     logging.info("build: 0x%s", args.build)
     logging.info("board type: %s", args.board)
-
 
     mp7path = os.path.join(args.path, args.tag)
 
@@ -112,31 +138,19 @@ def main():
         filename = "ProjectManager.py"
         # Remove existing file.
         remove_file(filename)
-
         # Download file
-        if args.old:
-            release_mode = 'unstable' if args.unstable else 'stable'
-            url = "https://svnweb.cern.ch/trac/cactus/browser/tags/mp7/{release_mode}/firmware/mp7fw_v1_6_0/cactusupgrades/scripts/firmware/ProjectManager.py?format=txt".format(**locals())
-            logging.info("retrieving %s", url)
-            urllib.urlretrieve(url, filename)
-        else:
-            release_mode = 'unstable' if args.unstable else 'stable'
-            url = "https://svnweb.cern.ch/trac/cactus/browser/tags/mp7/{release_mode}/firmware/{args.tag}/cactusupgrades/scripts/firmware/ProjectManager.py?format=txt".format(**locals())
-            logging.info("retrieving %s", url)
-            urllib.urlretrieve(url, filename)
+        release_mode = 'unstable' if args.unstable else 'stable'
+        url = "https://svnweb.cern.ch/trac/cactus/browser/tags/mp7/{release_mode}/firmware/{args.tag}/cactusupgrades/scripts/firmware/ProjectManager.py?format=txt".format(**locals())
+        logging.info("retrieving %s", url)
+        urllib.urlretrieve(url, filename)
+        make_executable(filename)
 
-        # Make executable
-        st = os.stat(filename)
-        os.chmod(filename, st.st_mode | stat.S_IEXEC)
-
-
-        logging.info("checkout AMC502 base firmware...")
+        logging.info("checkout MP7 base firmware...")
         path = os.path.join('tags', 'mp7', 'unstable' if args.unstable else 'stable', 'firmware', args.tag)
-        path_amc502 = os.path.join('trunk', 'cactusupgrades', 'boards', 'amc502')
-        subprocess.check_call(['python', 'ProjectManager.py', 'create', path, '-u', args.user]) #changes in ProjectManager.py, have to differ between older and newer versions
-        subprocess.check_call(['rm', '-rf', 'cactusupgrades/boards/amc502']) #maybe change to svn switch?!
-        subprocess.check_call(['svn', 'co', "https://{args.user}@svn.cern.ch/reps/cactus/trunk/cactusupgrades/boards/amc502".format(**locals())])
-        subprocess.check_call(['mv', 'amc502', 'cactusupgrades/boards/'])
+        if args.old:
+            subprocess.check_call(['python', 'ProjectManager.py', 'checkout', path, '-u', args.user])
+        else:
+            subprocess.check_call(['python', 'ProjectManager.py', 'create', path, '-u', args.user]) #changes in ProjectManager.py, have to differ between older and newer versions
 
         os.chdir(args.path)
 
@@ -146,14 +160,11 @@ def main():
         os.symlink(mp7path, mp7currDir)
         mp7currPath = os.path.join(args.path, mp7currDir)
 
+        patchFiles.patch_all(os.path.join(mp7path,'cactusupgrades'))
+
         os.chdir(mp7currPath)
 
     else:
-        os.chdir(mp7path)
-
-        subprocess.check_call(['rm', '-rf', 'cactusupgrades/boards/amc502']) #maybe change to svn switch?!
-        subprocess.check_call(['svn', 'co', "https://{args.user}@svn.cern.ch/reps/cactus/trunk/cactusupgrades/boards/amc502".format(**locals())])
-        subprocess.check_call(['mv', 'amc502', 'cactusupgrades/boards/'])
 
         # included in the else, to preserve the path structure
         os.chdir(args.path)
@@ -169,21 +180,11 @@ def main():
 
         ######################################################
 
-
     cwd = os.getcwd()
     os.chdir(mp7path)
 
     #
-    #  Fetching projects from cactus
-    #
-    #print os.path.join("cactusupgrades/projects/examples", args.board)
-    #sys.exit()
-    #if not os.path.isdir(os.path.join("cactusupgrades/projects/examples", args.board)):
-        #logging.info("fetching project firmware...")
-        #subprocess.check_call(['python', 'ProjectManager.py', 'fetch', os.path.join('projects/examples', args.board)])
-
-    #
-    #  Patching VHDL
+    #  Patching top VHDL
     #
     logging.info("patch the target package with current UNIX timestamp/username/hostname...")
     subprocess.check_call(['python', os.path.join(scripts_dir, 'pkgpatch.py'), '--build', args.build ,TARGET_PKG_TPL, TARGET_PKG])
@@ -191,61 +192,98 @@ def main():
     #
     #  Creating build areas
     #
-    logging.info("creating build areas...")
-    build_area_dir = ''.join(('extcond_build_0x', args.build))
+    logging.info("creating build area...")
+    build_area_dir = ''.join(('build_0x', args.build))
 
     if os.path.isdir(build_area_dir):
         raise RuntimeError("build area alredy exists: {build_area_dir}".format(**locals()))
 
-    module_dir = os.path.join(build_area_dir, 'amc502_extcond')
-    os.makedirs(module_dir)
+    # Create build directory for fw synthesis...
+    project_dir = os.path.abspath(os.path.join(build_area_dir))
+    os.makedirs(project_dir)
 
-    local_fw_dir = os.path.abspath(os.path.join(module_dir, 'fw'))
-    os.makedirs(local_fw_dir)
+    # Copy sources to module build area
+    copy_tree(os.path.join(amc502Path, 'firmware', 'cfg'), os.path.join(project_dir, 'firmware', 'cfg'))
+    copy_tree(os.path.join(amc502Path, 'firmware', 'hdl'), os.path.join(project_dir, 'firmware', 'hdl'))
+    copy_tree(os.path.join(amc502Path, 'firmware', 'ucf'), os.path.join(project_dir, 'firmware', 'ucf'))
+    copy_tree(os.path.join(amc502Path, 'firmware', 'cgn'), os.path.join(project_dir, 'firmware', 'cgn'))
 
-    copy_tree(os.path.join(uGTalgosPath, 'firmware', 'cfg'), os.path.join(local_fw_dir, 'firmware', 'cfg'))
-    copy_tree(os.path.join(uGTalgosPath, 'firmware', 'hdl'), os.path.join(local_fw_dir, 'firmware', 'hdl'))
-    #copy_tree(os.path.join(uGTalgosPath, 'firmware', 'ngc'), os.path.join(local_fw_dir, 'firmware', 'ngc'))
-    copy_tree(os.path.join(uGTalgosPath, 'firmware', 'ucf'), os.path.join(local_fw_dir, 'firmware', 'ucf'))
-    subprocess.check_call(['python', 'ProjectManager.py', 'vivado', uGTalgosPath, '-w', module_dir])
+    # Copy changed MP7 files to project
+    src_sub_dir = '../replacement_files/'
 
+    replace_file_list=[
+      ('cfg/mp7_690es.dep',
+       'boards/mp7/base_fw/mp7_690es/firmware/cfg/mp7_690es.dep'
+       ),
+      ('cfg/mp7_690es.tcl',
+       'boards/mp7/base_fw/mp7_690es/firmware/cfg/mp7_690es.tcl'
+       ),
+      ('cfg/mp7_readout.dep',
+       'components/mp7_readout/firmware/cfg/mp7_readout.dep'
+       ),
+      ('cfg/constraints_r1.dep',
+       'boards/mp7/base_fw/common/firmware/cfg/constraints_r1.dep'
+       ),
+      ('cfg/k7_420.dep',
+       'components/ipbus_eth/firmware/cfg/k7_420.dep'
+       ),
+      ('hdl/mp7_690es.vhd',
+       'boards/mp7/base_fw/mp7_690es/firmware/hdl/mp7_690es.vhd'
+       ),
+      ('hdl/mp7_brd_decl.vhd',
+       'boards/mp7/base_fw/mp7_690es/firmware/hdl/mp7_brd_decl.vhd'
+       ),
+      ('hdl/mp7_infra.vhd',
+       'components/mp7_infra/firmware/hdl/mp7_infra.vhd'
+       ),
+      ('hdl/ext_align_gth_32b_10g_spartan.vhd',
+       'components/mp7_links/firmware/hdl/protocol/ext_align_gth_32b_10g_spartan.vhd'
+       ),
+      ('ucf/area_constraints.tcl',
+       'boards/mp7/base_fw/common/firmware/ucf/area_constraints.tcl'
+       ),
+      ('ucf/clock_constraints.tcl',
+       'boards/mp7/base_fw/common/firmware/ucf/clock_constraints.tcl'
+       ),
+      ('ucf/mp7_mgt.tcl',
+       'boards/mp7/base_fw/common/firmware/ucf/mp7_mgt.tcl'
+       ),
+      ('ucf/pins.tcl',
+       'boards/mp7/base_fw/common/firmware/ucf/pins.tcl'
+       ),
+      ('ngc/gig_eth_pcs_pma_v11_4.ngc',
+       'components/ipbus_eth/firmware/ngc/gig_eth_pcs_pma_v11_4.ngc'
+       ),
+      ('cgn/gtwizard_v2_3_gbe.xco',
+       'components/ipbus_eth/firmware/cgn/gtwizard_v2_3_gbe.xco'
+       ),
+      ('hdl/eth_7s_1000basex_gtx.vhd',
+       'components/ipbus_eth/firmware/hdl/eth_7s_1000basex_gtx.vhd'
+       ),
+      ('gen_hdl/gig_eth_pcs_pma_v11_4/gig_eth_pcs_pma_v11_4_reset_sync.vhd',
+       'components/ipbus_eth/firmware/gen_hdl/gig_eth_pcs_pma_v11_4/gig_eth_pcs_pma_v11_4_reset_sync.vhd'
+       ),
+      ('gen_hdl/gig_eth_pcs_pma_v11_4/gig_eth_pcs_pma_v11_4_sync_block.vhd',
+       'components/ipbus_eth/firmware/gen_hdl/gig_eth_pcs_pma_v11_4/gig_eth_pcs_pma_v11_4_sync_block.vhd'
+       ),
+      ('gen_hdl/gig_eth_pcs_pma_v11_4/gig_eth_pcs_pma_v11_4_block.vhd',
+       'components/ipbus_eth/firmware/gen_hdl/gig_eth_pcs_pma_v11_4/gig_eth_pcs_pma_v11_4_block.vhd'
+       ),
+      ('hdl/ttc_clocks.vhd',
+       'components/mp7_ttc/firmware/hdl/ttc_clocks.vhd'
+       ),
+      ]
+
+    for source, dest in replace_file_list:
+        src_path = os.path.abspath(os.path.join(scripts_dir, src_sub_dir, source))
+        dest_path = os.path.abspath(os.path.join(mp7path, 'cactusupgrades', dest))
+        shutil.copy(src_path, dest_path)
+
+    logging.info("Sucessfully patched files for AMC502 ExtCond.")
+
+    # Run project manager
+    subprocess.check_call(['python', 'ProjectManager.py', 'vivado', project_dir])
     os.chdir(cwd)
-
-
-
-    #filename = os.path.join(uGTalgosPath, 'firmware/cfg/uGT_board.dep')
-    #with open(filename, 'w') as f:
-        #f.write("src -c projects/examples/{args.board} top_decl.vhd\n".format(**locals())) # Babak changed based on Dave suggesstion
-        #f.write("src top_decl_ugt_local.vhd\n".format(**locals())) # Babak changed based on Dave suggesstion
-        #f.write("src -c boards/mp7/base_fw/{args.board} mp7_brd_decl.vhd\n".format(**locals()))
-        #f.write("src {args.board}.vhd\n".format(**locals()))
-
-    logging.info("linking mp7_ugt into cactusupgrades/components...")
-    cwd = os.getcwd()
-    os.chdir('cactusupgrades/components/')
-    remove_file("mp7_ugt")
-    os.symlink(uGTalgosPath, "mp7_ugt")
-
-    os.chdir(cwd)
-
-    #logging.info("removing constraints for null algo...")
-    #filename = 'cactusupgrades/components/mp7_null_algo/firmware/ucf/mp7_null_algo.tcl'
-    ## Clear and touch
-    #clear_file(filename)
-
-    # Do for every module of the menu...
-    #for i in range(modules):
-        #logging.info("setting up build area")
-        #module_dir = os.path.join(build_area_dir, menu_name, 'module_{i}'.format(**locals()))
-        #os.chdir(module_dir)
-        #remove_file("runAll.sh")
-        #os.symlink(os.path.join(uGTalgosPath, 'runAll.sh'),  'runAll.sh')
-
-    #logging.info("replacing the original top file with the modified uGT one...")
-    #shutil.copyfile(
-        #os.path.join(uGTalgosPath, 'firmware/hdl/{args.board}.vhd'.format(**locals())),
-        #os.path.join(mp7currPath, 'cactusupgrades/boards/mp7/base_fw/{args.board}/firmware/hdl/{args.board}.vhd'.format(**locals()))
-    #)
 
     # Go to build area root directory.
     os.chdir(mp7path)
@@ -258,26 +296,23 @@ def main():
     config.set('environment', 'hostname', hostname())
     config.set('environment', 'username', username())
 
-    #config.add_section('menu')
-    #config.set('menu', 'build', args.build)
-    #config.set('menu', 'name', menu_name)
-    #config.set('menu', 'location', args.menu)
-    #config.set('menu', 'modules', modules)
-
     config.add_section('firmware')
     config.set('firmware', 'tag', args.tag)
     config.set('firmware', 'stable', str(not args.unstable))
-    config.set('firmware', 'buildarea', os.path.join(mp7path, build_area_dir, 'amc502_extcond'))
+    config.set('firmware', 'build', args.build)
+    config.set('firmware', 'type', 'extcond')
+    config.set('firmware', 'buildarea', os.path.join(mp7path, build_area_dir))
 
     config.add_section('device')
     config.set('device', 'type', args.board)
+    config.set('device', 'name', 'amc502')
     config.set('device', 'alias', BoardAliases[args.board])
 
     # Writing our configuration file to 'example.cfg'
     with open('.'.join((build_area_dir, 'cfg')), 'wb') as configfile:
         config.write(configfile)
 
-    logging.info("finished with success.")
+    logging.info("AMC502 ExtCond project maker finished with success.")
 
 if __name__ == '__main__':
     try:

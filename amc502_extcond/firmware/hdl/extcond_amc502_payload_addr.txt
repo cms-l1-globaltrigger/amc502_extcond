@@ -1,0 +1,13 @@
+#
+# this is a file for the automated ipbus address decoder generator gtu-ipbus-decoder
+#
+####################################################################################
+
+N_SLV_MINFO         0x80000000  5
+N_SLV_DEL           0x80000040  6
+N_SLV_TCM           0x80000080  5
+N_SLV_PULSE_REGS    0x800000A0  5
+N_SLV_PHASE         0x800000C0  6
+N_SLV_PHASECNTR     0x80000100  5
+N_SLV_SPYMEM<2>     0x81000000  12
+N_SLV_SIMMEM<2>     0x81002000  12

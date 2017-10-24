@@ -30,6 +30,7 @@ use IEEE.numeric_std.all;
 library work;
 use work.math_pkg.all;
 use work.user_package.all;
+use work.gt_mp7_core_pkg.all;
 
 entity delay_element is
 	generic

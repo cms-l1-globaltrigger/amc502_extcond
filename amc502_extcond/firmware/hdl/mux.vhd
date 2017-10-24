@@ -22,10 +22,10 @@ library work;
 use work.mp7_data_types.all;
 
 entity mux is
-	port
-	(   clk    : in std_logic;
+    port
+    (   clk    : in std_logic;
         res    : in std_logic;
-        lhc_clk  : in std_logic; -- clk 40 MHz
+        bcres  : in std_logic; -- bcres 40 MHz
         -- 6 inputs for 40MHz -> 240MHz
         in0    : in lword;
         in1    : in lword;
@@ -33,47 +33,39 @@ entity mux is
         in3    : in lword;
         in4    : in lword;
         in5    : in lword;
-        -- select signal
---      JW - 18.12.2014 put frame_counter code into mux
---      sel    : in std_logic_vector(2 downto 0);
-		-- output
-		mux_out   : out lword
-	);
+        -- output
+        mux_out   : out lword
+    );
 end mux;
 
 architecture arch of mux is
     signal s_out    : lword;
-    signal frame_cntr                       : std_logic_vector (2 downto 0); --! counter for frame mux: 0 to 5
-    signal temp0 : std_logic;
-    signal temp1 : std_logic;
-    signal bcres240 : std_logic; -- bcres 240 MHz
+    signal frame_cntr  : std_logic_vector (2 downto 0); --counter for frame mux: 0 to 5
+    signal bcres_240, temp0, temp1: std_logic;
 begin
 
---     --=============================--
---     process(res, clk)
---     --=============================--
---     begin
---     if res = '1' then
---         temp0 <= '0';
---         temp1 <= '0';
---         bcres240 <= '0';
---     elsif rising_edge(clk) then
---         temp0 <= bcres;
---         temp1 <= temp0;
---         bcres240 <= temp0 and not temp1;
---     end if;
---     end process;
+    --=============================--
+    process(res, clk)
+    --=============================--
+    begin
+    if res = '1' then
+        temp0 <= '0';
+        temp1 <= '0';
+        bcres_240 <= '0';
+    elsif rising_edge(clk) then
+        temp0 <= bcres;
+        temp1 <= temp0;
+        bcres_240 <= temp0 and not temp1;
+    end if;
+    end process;
 
     -- frame counter
-    frame_counter: process (clk, lhc_clk, res)
+    frame_counter: process (clk, res)
     begin
         if (res = '1') then
            frame_cntr <= "000";      -- async. res
         elsif (clk'event and clk = '1') then
-            if (lhc_clk'event and lhc_clk = '1') then
-                frame_cntr <= "000";   -- sync BCReset
-            end if;
-            if (frame_cntr = "101") then
+            if (frame_cntr = "101") or (bcres_240 = '1') then
                 frame_cntr <= "000";   -- sync BCReset
             else
                 frame_cntr <= frame_cntr + '1';
@@ -89,14 +81,13 @@ begin
                 in5 when frame_cntr = "101" else
                 ((others => '0'), '0', '0', '0');
 
-	sync : process(clk)
-	begin
-		if rising_edge(clk) then
-			mux_out <= s_out;
-		end if;
-	end process;
+    sync : process(clk)
+    begin
+        if rising_edge(clk) then
+            mux_out <= s_out;
+        end if;
+    end process;
 
 end architecture;
-
 
 

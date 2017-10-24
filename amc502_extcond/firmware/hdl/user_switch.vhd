@@ -31,23 +31,26 @@ begin
     id  <= user_in(3 downto 0);
     loc <= user_in(6 downto 4);
 
-    ip_hi       <=  X"C0A801" when loc = "000" else -- loc 0 is Vienna crate1
-                    X"0AB05E" when loc = "001" else -- loc 1 is CERN P5 crate1
+    ip_hi       <=  X"C0A801" when loc = "000" else -- loc 0 is Vienna crate1     - the first 3 IP digits (192.168.1.X)
+                    X"0AB083" when loc = "001" else -- loc 1 is CERN P5 production crate  - the first 3 IP digits (10.176.131.X)
+                    X"0AB083" when loc = "011" else -- loc 2 is CERN P5 testcrate - the first 3 IP digits (10.176.131.X)
                     (others => '0');
 
-    ip_const    <=  X"C8" when loc = "000" else -- loc 0 is Vienna crate1
-                    X"5B" when loc = "001" else -- loc 1 is CERN P5 crate1
+    ip_const    <=  X"C8" when loc = "000" else -- loc 0 is Vienna crate1 - the start value of the 4th IP digit (.200)
+                    X"23" when loc = "001" else -- loc 1 is CERN P5 production crate - the start value of the 4th IP digit (.35)
+                    X"C3" when loc = "011" else -- loc 2 is CERN P5 testcrate - the start value of the 4th IP digit (.195)
                     (others => '0');
 
-    mac_const    <=  X"C9" when loc = "000" else -- loc 0 is Vienna crate1
-                    X"C9" when loc = "001" else -- loc 1 is CERN P5 crate1
+    mac_const    <= X"C8" when loc = "000" else -- loc 0 is Vienna crate1 - last MAC value (200)
+                    X"C8" when loc = "001" else -- loc 1 is CERN P5 production crate - last MAC value (200)
+                    X"A5" when loc = "011" else -- loc 2 is CERN P5 testcrate - last MAC value (165)
                     (others => '0');
 
     ip_lo       <=  std_logic_vector(unsigned(ip_const) + unsigned(id)); --adding slot # to fix value
     ip          <=  ip_hi & ip_lo; -- generating ip address
 
     mac_lo      <=  std_logic_vector(unsigned(mac_const) + unsigned(id)); --adding slot # to fix value
-    mac         <=  X"080030F303" & mac_lo; -- generate mac from fixed part and 4 user_sw inputs
+    mac         <=  X"080030F304" & mac_lo; -- generate mac from fixed part and 4 user_sw inputs
 
 
     -- outputs

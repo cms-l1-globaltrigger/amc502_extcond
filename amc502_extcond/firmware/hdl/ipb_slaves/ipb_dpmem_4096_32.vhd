@@ -41,7 +41,7 @@ begin
     wea_i(0) <= wea and ipbus_in.ipb_write;
     web_i(0) <= web;
 
-    dp_mem_4096x32_i: entity work.blk_mem_gen_v7_3
+    dp_mem_4096x32_i: entity work.blk_mem_gen_0
         port map(
             clka => ipbus_clk,
             ena => ipbus_in.ipb_strobe,
