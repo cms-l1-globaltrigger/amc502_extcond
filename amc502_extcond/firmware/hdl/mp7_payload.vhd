@@ -53,6 +53,7 @@ architecture rtl of mp7_payload is
 
     signal lhc_clk: std_logic; -- lhc_clk 40MHz
     signal lhc_rst: std_logic; -- lhc clk reset
+    signal cntr_rst : std_logic; -- TCM counter reset
 
     signal ext_cond_a: std_logic_vector(63 downto 0); -- async input signal from HFMC
     signal ext_cond_s: std_logic_vector(63 downto 0); -- synchronized input signal from HFMC
@@ -92,6 +93,11 @@ architecture rtl of mp7_payload is
     signal spytrig_i: sw_reg_spytrigger_in_t;
     signal spytrig_o: sw_reg_spytrigger_out_t;
     signal spytrigger: std_logic;
+
+    -- HB 2017-08-28: added signal "begin_lumi_per" for rate counter
+    signal begin_lumi_per: std_logic;
+    signal rate_cnt_ext_cond : ipb_reg_v(63 downto 0) := (others => (others => '0'));
+
 begin
 
     bc0 <= '0';
@@ -100,6 +106,8 @@ begin
 
 	lhc_clk <= clk_payload(0); --40MHz
 	lhc_rst <= rst or pulse(0); --rst40; -- High Active!! ipbus_reset OR user_reset
+
+	cntr_rst <= pulse(5); -- counter reset pulse
 
     fabric_i: entity work.ipbus_fabric_sel
     generic map(
@@ -117,10 +125,10 @@ begin
     port map(
         lhc_clk            =>  lhc_clk,
         lhc_rst            =>  lhc_rst,
-	ec0		  =>  '0',
-	oc0		   =>  '0',
-	resync		   =>  '0',
-	start		   =>  '0',
+        cntr_rst           =>  cntr_rst,
+        ec0                =>  '0',
+        oc0                =>  '0',
+        start              =>  '0',
         l1a_sync           =>  '0',
         bcres_d            =>  bc_res,
         bcres_d_FDL        =>  '0',
@@ -132,7 +140,7 @@ begin
         trigger_nr         =>  trigger_nr,
         orbit_nr           =>  orbit_nr,
         luminosity_seg_nr  =>  open,
-        start_lumisection  =>  open
+        start_lumisection  =>  begin_lumi_per
     );
 
 	user_i: entity work.user_switch
@@ -179,7 +187,24 @@ begin
     );
     --===========================================--
 
-        --===========================================--
+    -- ==============================================================
+    -- HB 2017-08-28: inserted rate counter status regs for ext cond inputs
+    rate_counter_status_regs_i: entity work.ipbus_ctrlreg_v
+    generic map(
+        N_CTRL => 64,
+        N_STAT => 64
+    )
+    port map(
+        clk              => clk,
+        reset            => rst,
+        ipbus_in         => ipb_to_slaves(N_SLV_RATECNTR),
+        ipbus_out        => ipb_from_slaves(N_SLV_RATECNTR),
+        d                => rate_cnt_ext_cond,
+        stb              => open
+    );
+    -- ==============================================================
+
+    --===========================================--
     tcm_regs_i: entity work.ipbus_ctrlreg_v
     --===========================================--
     generic map(
@@ -350,8 +375,26 @@ begin
                    simmem_o   when sDataMux = X"01" else
                    (others => '0');
 
+    -- ==============================================================
+    -- HB 2017-08-28: inserted rate counter for ext cond inputs
+    rate_cnt_l: for i in 0 to 63 generate
+        rate_cnt_i: entity work.algo_rate_counter
+            generic map(
+                COUNTER_WIDTH => 32
+            )
+            port map(
+                sys_clk => '0',
+                lhc_clk => lhc_clk,
+                sres_counter => '0',
+                store_cnt_value => begin_lumi_per,
+                algo_i => ext_cond_d(i),
+                counter_o => rate_cnt_ext_cond(i)
+            );
+    end generate rate_cnt_l;
+    -- ==============================================================
 
-    output: for i in 0 to 3 generate
+
+    output: for i in 0 to 7 generate
         ext_cond_mux_i: entity work.mux
         port map(
             clk         => clk_p, -- clk 240 MHz

@@ -11,9 +11,9 @@ use work.mp7_top_decl.all;
 
 package top_decl is
 
-        constant ALGO_REV: std_logic_vector(31 downto 0) := X"00000001";
-        constant BUILDSYS_BUILD_TIME: std_logic_vector(31 downto 0) := X"59ef5a71";
-        constant TOP_USERNAME : std_logic_vector(32*8-1 downto 0)  := X"0000000000000000000000000000000000000000000000006e6e616d74746977";
+        constant ALGO_REV: std_logic_vector(31 downto 0) := X"00001001";
+        constant BUILDSYS_BUILD_TIME: std_logic_vector(31 downto 0) := X"59f04ed1";
+        constant TOP_USERNAME : std_logic_vector(32*8-1 downto 0)  := X"0000000000000000000000000000000000000000000000007265756167726562";
         constant BUILDSYS_BLAME_HASH: std_logic_vector(31 downto 0) := TOP_USERNAME(31 downto 0);
 	
 	constant LHC_BUNCH_COUNT: integer := 3564;

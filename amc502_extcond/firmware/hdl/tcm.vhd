@@ -14,6 +14,8 @@
 -- $Author: ?
 -- $Revision: 3796 $
 
+-- JW 2017-08-28: Added cntr_rst signal.
+-- HB 2016-09-19: Removed "resync" and "stop" from port, not used anymore.
 -- HB 2016-07-04: Signal err_det not used anymore, but remained in the sw_reg_out (used by swatch ?). Removed err_det_reset_old from record, not used anymore.
 -- HB 2016-06-30: Inserted new logic for "start_lumisection" with "oc0" (to prevent 50ns pulse of "start_lumisection" after OC0).
 -- HB 2016-04-25: Resync not used anymore. Resetting v.orbit_nr_periodic with resync was a bug.
@@ -38,9 +40,9 @@ entity tcm is
     (
 	lhc_clk           : in std_logic;
 	lhc_rst           : in std_logic;
+	cntr_rst          : in std_logic;
 	ec0		  : in std_logic;
 	oc0		  : in std_logic;
-	resync		  : in std_logic;
 	start		  : in std_logic;
 	l1a_sync          : in std_logic;
 	bcres_d           : in std_logic;
@@ -82,10 +84,14 @@ architecture beh of tcm is
 
     signal l, lin  : lhc_reg_t;
     signal start_lumisection_int  : std_logic := '0';
+    signal tcm_rst : std_logic := '0';
 
 begin
+
+    tcm_rst <= lhc_rst or cntr_rst; -- TCM reset
+
     -- LHC clock domain
-    ctrl_lhc: process(lhc_rst, l, ec0, oc0, resync, start, l1a_sync, bcres_d, sw_reg_in, bcres_d_FDL)
+    ctrl_lhc: process(tcm_rst, l, ec0, oc0, start, l1a_sync, bcres_d, sw_reg_in, bcres_d_FDL)
 	variable v : lhc_reg_t;
     begin
 	v := l;
@@ -143,20 +149,20 @@ begin
 	    v.event_nr := event_nr_t(unsigned(l.event_nr) + to_unsigned(1, EVENT_NR_WIDTH));
 	    v.trigger_nr := trigger_nr_t(unsigned(l.trigger_nr) + to_unsigned(1, TRIGGER_NR_WIDTH));
 	end if;
-		
+
 	if oc0 = '1' then
 	    v.orbit_nr := orbit_nr_t(to_unsigned(1, ORBIT_NR_WIDTH));
 	    v.orbit_nr_periodic := (others => '0');
 	    v.luminosity_seg_nr := luminosity_seg_nr_t(to_unsigned(1, LUM_SEG_NR_WIDTH));
 	end if;
-	
+
 	if start = '1' then
 	    v.trigger_nr := (others => '0');
 	end if;
 	if ec0 = '1' then
 	    v.event_nr := (others => '0');
 	end if;
-	
+
 	-- write out software registers
 -- HB 2016-07-04: Signal err_det not used anymore, but remained in the sw_reg_out (used by swatch ?)
 	sw_reg_out(0)(11 downto 0)       <= l.bx_nr;
@@ -187,10 +193,10 @@ begin
 
 -- HB 2016-06-30: Inserted new logic for "start_lumisection" with "oc0" (to prevent 50ns pulse of "start_lumisection" after OC0).
     start_lumisection <= start_lumisection_int or oc0;
-	
-    sync_lhc: process(lhc_clk, lhc_rst)
+
+    sync_lhc: process(lhc_clk, tcm_rst)
     begin
-	if lhc_rst = RST_ACT then
+	if tcm_rst = RST_ACT then
 	    l <= LHC_REG_T_RESET;
 	elsif rising_edge(lhc_clk) then
 	    l <= lin;
