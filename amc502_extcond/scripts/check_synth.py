@@ -167,10 +167,11 @@ def main():
     filename = "{}.cfg".format(buildname)
     config.read(os.path.join(args.path, filename))
     fw_type = config.get('firmware', 'type')
+    board_type = config.get('device', 'name')
 
     module_path = os.path.abspath(args.path)
     log_info("=" * ts)
-    log_info("AMC502 %s synthesis results" % fw_type)
+    log_info("{0} {1} synthesis results".format(board_type, fw_type))
     log_info("=" * ts)
     log_info("")
     find_errors(module_path, args, 0)
