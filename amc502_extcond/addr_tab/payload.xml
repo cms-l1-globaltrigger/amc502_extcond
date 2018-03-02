@@ -8,14 +8,14 @@
     <node id="mux" address="0x04" description="Multiplexer for Sim/Data">
         <node id="data_mux" address="0x0" mask="0x000000ff"/>
     </node>
-    <node id="ip2" address="0x5" mask="0xffffffff" description="Unused Control Reg"/>
+<!--    <node id="ip2" address="0x5" mask="0xffffffff" description="Unused Control Reg"/>
     <node id="ip3" address="0x6" mask="0xffffffff" description="Unused Control Reg"/>
     <node id="ip4" address="0x7" mask="0xffffffff" description="Unused Control Reg"/>
     <node id="ip5" address="0x8" mask="0xffffffff" description="Unused Control Reg"/>
     <node id="ip6" address="0x9" mask="0xffffffff" description="Unused Control Reg"/>
     <node id="ip7" address="0xa" mask="0xffffffff" description="Unused Control Reg"/>
     <node id="ip8" address="0xb" mask="0xffffffff" description="Unused Control Reg"/>
-    <node id="ip9" address="0xc" mask="0xffffffff" description="Unused Control Reg"/>
+    <node id="ip9" address="0xc" mask="0xffffffff" description="Unused Control Reg"/>-->
     <node id="spytrig_ctrl" address="0x0d" description="Control Regs for Spytrigger">
         <node id="orbit_nr_l" address="0x00" mask="0xffffffff"/>
         <node id="orbit_nr_h" address="0x01" mask="0x0000ffff"/>
@@ -36,7 +36,7 @@
         <node id="timestamp" address="0x06" mask="0xffffffff" parameters="type=timestamp"/>
         <node id="username"  address="0x07" mode="incremental" size="8" parameters="type=string"/>
     </node>
-    <node id="ip19" address="0x16" mask="0xffffffff" description="Unused Status Reg"/>
+<!--    <node id="ip19" address="0x16" mask="0xffffffff" description="Unused Status Reg"/>
     <node id="ip20" address="0x17" mask="0xffffffff" description="Unused Status Reg"/>
     <node id="ip21" address="0x18" mask="0xffffffff" description="Unused Status Reg"/>
     <node id="ip22" address="0x19" mask="0xffffffff" description="Unused Status Reg"/>
@@ -44,7 +44,7 @@
     <node id="ip24" address="0x1b" mask="0xffffffff" description="Unused Status Reg"/>
     <node id="ip25" address="0x1c" mask="0xffffffff" description="Unused Status Reg"/>
     <node id="ip26" address="0x1d" mask="0xffffffff" description="Unused Status Reg"/>
-    <node id="ip27" address="0x1e" mask="0xffffffff" description="Unused Status Reg"/>
+    <node id="ip27" address="0x1e" mask="0xffffffff" description="Unused Status Reg"/>-->
     <node id="spytrig_status" address="0x1f" description="SpyTrigger Status Regs">
         <node id="trig_spy12_error" address="0x00" mask="0x08000000" tags="0x0:OK,0x1:ERROR"/>
         <node id="trig_spy12_ready" address="0x00" mask="0x20000000" tags="0x0:NOTREADY,0x1:READY"/>
