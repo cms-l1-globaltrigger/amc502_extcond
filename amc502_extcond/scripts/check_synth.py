@@ -160,16 +160,17 @@ def main():
         raise RuntimeError("no such directory: {}".format(args.path))
 
     # Name of build directory.
-    buildname = os.path.basename(os.path.abspath(args.path))
+    build_version = os.path.abspath(args.path).split(os.sep)[-3]
 
     # Read build configuration.
     config = ConfigParser.ConfigParser()
-    filename = "{}.cfg".format(buildname)
+    filename = "build_{}.cfg".format(build_version)
     config.read(os.path.join(args.path, filename))
     fw_type = config.get('firmware', 'type')
     board_type = config.get('device', 'name')
 
     module_path = os.path.abspath(args.path)
+    print "module_path", module_path
     log_info("=" * ts)
     log_info("{0} {1} synthesis results".format(board_type, fw_type))
     log_info("=" * ts)

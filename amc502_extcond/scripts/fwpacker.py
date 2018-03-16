@@ -51,7 +51,7 @@ def main():
     buildarea = config.get('firmware', 'buildarea')
     timestamp = get_timestamp()
 
-    basename = "{fw_type}_{board}_v{build}".format(**locals())
+    basename = "{board}_{fw_type}_v{build}".format(**locals())
     basepath = os.path.dirname(args.config)
     # Custom output directory?
     if args.outdir:
