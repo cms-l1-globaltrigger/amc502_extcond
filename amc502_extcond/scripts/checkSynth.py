@@ -109,7 +109,7 @@ def find_errors(module_path, module_id, args):
         # else a second try
         timing_summary = os.path.join(impl_path, 'top_timing_summary_routed.rpt')
         if not os.path.isfile(timing_summary):
-            log_error("MISSING TIMING SUMMARY: failed to locate timing summary for module #{}".format(module_id))
+            log_error("MISSING TIMING SUMMARY: failed to locate timing summary")
             return
 
     # Parse timing summary

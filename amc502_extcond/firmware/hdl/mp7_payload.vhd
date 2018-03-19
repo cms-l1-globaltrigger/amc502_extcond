@@ -294,7 +294,12 @@ begin
         data_out => ext_cond_s -- outputs
     );
 
-    spytrig_i.orbit_nr <= X"0000" & module_info_control_regs(14)(15 downto 0) & module_info_control_regs(13);
+    
+-- HB 2018-03-19: changed "spytrig_i.orbit_nr" assignment, because of error in synth_1/runme.log with Vivado 2017.4 (but not with 2017.1) => 
+-- ERROR: [Synth 8-690] width mismatch in assignment; target has 48 bits, source has 64 bits [/home/bergauer/work/fwdir/amc502_extcond/0xff01/mp7fw_v2_4_0/build/firmware/hdl/mp7_payload.vhd:297]
+
+--     spytrig_i.orbit_nr <= X"0000" & module_info_control_regs(14)(15 downto 0) & module_info_control_regs(13);
+    spytrig_i.orbit_nr <= module_info_control_regs(14)(15 downto 0) & module_info_control_regs(13);
     spytrig_i.spy12_once_event        <= pulse(2); --module_info_control_regs(15)(0);
     spytrig_i.spy12_next_event        <= pulse(3); --module_info_control_regs(15)(1);
     spytrig_i.spy3_event              <= pulse(4); --module_info_control_regs(15)(2);
