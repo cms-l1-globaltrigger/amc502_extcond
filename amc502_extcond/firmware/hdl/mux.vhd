@@ -1,18 +1,3 @@
--------------------------------------------------------------------------------
--- Synthesizer : ISE 14.6
--- Platform    : Linux Ubuntu 14.04
--- Targets     : Synthese
---------------------------------------------------------------------------------
--- This work is held in copyright as an unpublished work by HEPHY (Institute
--- of High Energy Physics) All rights reserved.  This work may not be used
--- except by authorized licensees of HEPHY. This work is the
--- confidential information of HEPHY.
---------------------------------------------------------------------------------
----Description: Mux
--- $HeadURL: svn://heros.hephy.oeaw.ac.at/GlobalTriggerUpgrade/firmware/tdf_mp7/trunk/src/tdf_mp7_core/mux/mux.vhd $
--- $Date: 2014-11-17 18:19:16 +0100 (Mon, 17 Nov 2014) $
--- $Author: wittmann $
--- $Revision: 3435 $
 
 library ieee;
 use IEEE.std_logic_1164.all;
