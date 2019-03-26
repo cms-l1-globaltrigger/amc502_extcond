@@ -3,7 +3,7 @@
 * This is a draft description with branches of MP7 and ugt repos.
 * A fork of [MP7](https://gitlab.cern.ch/hbergaue/mp7) firmware is available with:
   - branch "mp7fw_v2_4_1_amc502_extcond" created from tag mp7fw_v2_4_1.
- * This branch contains modified MP7 files for amc502_extcond:
+* This branch contains modified MP7 files for amc502_extcond:
   - boards/mp7/base_fw/mp7_690es/firmware/cfg/mp7_690es.dep
   - boards/mp7/base_fw/mp7_690es/firmware/cfg/mp7_690es.tcl
   - components/mp7_readout/firmware/cfg/mp7_readout.dep
