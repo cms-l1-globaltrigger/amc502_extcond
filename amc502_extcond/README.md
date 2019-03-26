@@ -28,7 +28,7 @@
 
 * and is used for build (see below).
 
-* The ugt branch [devel](https://gitlab.cern.ch/hbergaue/ugt) is a fork
+* The ugt branch [devel_amc502_extcond](https://gitlab.cern.ch/hbergaue/ugt) is a fork
 of [ugt](https://gitlab.cern.ch/cms-cactus/svn2git/firmware) master.
 
 ### Setup ###
