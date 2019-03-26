@@ -53,7 +53,7 @@ of [ugt](https://gitlab.cern.ch/cms-cactus/svn2git/firmware) master.
     
     # Create project 
     ipbb proj create vivado amc502_extcond_<build_version> mp7:../ugt/amc502_extcond
-    cd proj/mp7_ugt_<build_version>
+    cd proj/amc502_extcond_<build_version>
     ipbb vivado project
 
     # Run implementation, synthesis
