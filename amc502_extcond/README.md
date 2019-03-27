@@ -1,9 +1,10 @@
 ### Build amc502_extcond firmware with IPBB ###
 
 * This is a draft description with branches of MP7 and ugt repos.
-* A fork of [MP7](https://gitlab.cern.ch/hbergaue/mp7) firmware is available with:
+* A fork of [MP7](https://gitlab.cern.ch/hbergaue/mp7) firmware is available with following branches:
   - branch "mp7fw_v2_4_1_amc502_extcond" created from tag mp7fw_v2_4_1.
-* This branch contains modified MP7 files for amc502_extcond:
+  - branch "mp7fw_v2_4_3_amc502_extcond" created from tag mp7fw_v2_4_3.
+* These branches contain modified MP7 files for amc502_extcond:
   - boards/mp7/base_fw/mp7_690es/firmware/cfg/mp7_690es.dep
   - boards/mp7/base_fw/mp7_690es/firmware/cfg/mp7_690es.tcl
   - components/mp7_readout/firmware/cfg/mp7_readout.dep
@@ -26,9 +27,9 @@
   - components/mp7_ttc/firmware/hdl/ttc_clocks.vhd
   - components/mp7_links/firmware/cfg/gth_10g.dep
 
-* and is used for build (see below).
+* One of these branches is used for build (see below).
 
-* The ugt branch [devel](https://gitlab.cern.ch/hbergaue/ugt) is a fork
+* The ugt branch [devel_amc502_extcond](https://gitlab.cern.ch/hbergaue/ugt) is a fork
 of [ugt](https://gitlab.cern.ch/cms-cactus/svn2git/firmware) master.
 
 ### Setup ###
@@ -45,7 +46,7 @@ of [ugt](https://gitlab.cern.ch/cms-cactus/svn2git/firmware) master.
     cd <build_name>
     ipbb add git https://github.com/ipbus/ipbus-firmware.git -b master
     ipbb add git https://:@gitlab.cern.ch:8443/hbergaue/mp7.git -b mp7fw_v2_4_1_amc502_extcond
-    ipbb add git https://:@gitlab.cern.ch:8443/hbergaue/ugt.git -b devel
+    ipbb add git https://:@gitlab.cern.ch:8443/hbergaue/ugt.git -b devel_amc502_extcond
 
     # Patch file top_decl.vhd and copy to ../src/ugt/amc502_extcond/firmware/hdl
 
