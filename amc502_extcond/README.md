@@ -45,7 +45,7 @@
     cd <build_name>
     ipbb add git https://github.com/ipbus/ipbus-firmware.git -b master
     ipbb add git https://:@gitlab.cern.ch:8443/hbergaue/mp7.git -b mp7fw_v2_4_1_amc502_extcond
-    ipbb add git https://:@gitlab.cern.ch:8443/hbergaue/ugt.git -b devel_amc502_extcond
+    ipbb add git https://:@gitlab.cern.ch:8443/hbergaue/ugt.git -b master
 
     # Patch file top_decl.vhd and copy to ../src/ugt/amc502_extcond/firmware/hdl
 
