@@ -129,7 +129,7 @@ def main():
         )
 
     logging.info("creating IPBB project ...")
-    cmd_ipbb_proj_create = "ipbb proj create vivado mp7_ugt_{build_name} mp7:../ugt/{project_type}".format(**locals())
+    cmd_ipbb_proj_create = "ipbb proj create vivado {project_type}_{build_name} mp7:../ugt/{project_type}".format(**locals())
 
     command = 'bash -c "cd; {cmd_source_ipbb}; cd {ipbb_dir}; {cmd_ipbb_proj_create}"'.format(**locals())
     run_command(command)
