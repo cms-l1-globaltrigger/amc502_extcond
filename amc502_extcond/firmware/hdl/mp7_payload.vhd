@@ -5,6 +5,7 @@
 -- Dave Newbold, July 2013
 
 -- Version-history: 
+-- HB 2019-04-03: v1.7.0 (introduced release number for firmware tags)
 -- HB 2019-03-29: Added comments (version history was missing):
 -- 0x1010: Introduced cntr reset and ExtCond bit rate counters. Fixed cntr reset address. (JW 31.08.2017)
 -- 0x100E: Corrected the link order. (JW 11.07.2017)
