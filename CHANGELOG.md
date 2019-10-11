@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [v1.7.2] - 2019-10-11
+### Comment
+
+- amc502_extcond firmware release v1.7.2 is based on same features as firmware build v1010.
+- typo in tag name.
+
 ## [amc502_extcond_v1_7_1] - 2019-10-11
 ### Comment
 
